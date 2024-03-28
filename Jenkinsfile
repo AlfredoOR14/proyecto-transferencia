@@ -8,6 +8,9 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket3'
         NAME_BUCKET_S3 = 'alfredo02711'
+        //AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
+        //AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
+        
     }
     stages {
         stage('Descarga de Fuentes') {
@@ -41,7 +44,7 @@ pipeline {
             }
         }
 
-        /*
+        
         stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
                 sh "gcloud transfer jobs create \
@@ -52,6 +55,6 @@ pipeline {
                     --aws-access-key-id=${AWS_ACCESS_KEY_ID} \
                     --aws-secret-access-key=${AWS_SECRET_ACCESS_KEY}"
             }
-        }*/
+        }
     }
 }
