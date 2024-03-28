@@ -8,8 +8,8 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket3'
         NAME_BUCKET_S3 = 'alfredo02711'
-        //AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
-        //AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
+        AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
+        AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
         
     }
     stages {
