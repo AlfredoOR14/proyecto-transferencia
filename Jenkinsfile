@@ -33,7 +33,7 @@ pipeline {
                 sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
             }
         }
-        
+        /*
         stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
                 sh "gcloud transfer jobs create \
@@ -44,6 +44,6 @@ pipeline {
                     --aws-access-key-id=${AWS_ACCESS_KEY_ID} \
                     --aws-secret-access-key=${AWS_SECRET_ACCESS_KEY}"
             }
-        }
+        }*/
     }
 }
