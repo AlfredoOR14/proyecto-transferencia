@@ -6,7 +6,7 @@ pipeline {
         ENVIRONMENT = 'dev'
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket2'
+        NAME_BUCKET_GCP = 'mi-bucket3'
         NAME_BUCKET_S3 = 'alfredo02711'
     }
     stages {
@@ -29,10 +29,18 @@ pipeline {
         
         stage('Create Bucket in GCP') {
             steps {
-                sh "gcloud config set project ${PROJECT_ID}"
-                sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
+                script {
+                    sh "gcloud config set project ${PROJECT_ID}"
+                    def bucketExists = sh(script: "gsutil ls gs://${NAME_BUCKET_GCP}", returnStatus: true)
+                    if (bucketExists != 0) {
+                        sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
+                    } else {
+                        echo "El bucket gs://${NAME_BUCKET_GCP} ya existe. No se creará otro."
+                    }
+                }
             }
         }
+
         /*
         stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
