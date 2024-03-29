@@ -7,10 +7,8 @@ pipeline {
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         AWS_SERVICE_ACCOUNT = 'AWS_SECRET_ID'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket3'
+        NAME_BUCKET_GCP = 'mi-bucket4'
         NAME_BUCKET_S3 = 'alfredo02711'
-        CREDENTIALS_ID = 'AWS_ACCESS_KEY_ID'
-        SECRET_CREDENTIALS_ID = 'AWS_SECRET_ACCESS_KEY'
     }
     stages {
         stage('Descarga de Fuentes') {
@@ -56,5 +54,10 @@ pipeline {
                     }
                 }
             }
+        stage('Limpiando Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
     }
 }
