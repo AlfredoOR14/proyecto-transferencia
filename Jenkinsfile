@@ -44,20 +44,21 @@ pipeline {
         }
         
         stage('Creacion de trasferencia de datos de AWS a GCP') {
-            steps {
-              withCredentials([
-                        string(credentialsId: env.CREDENTIALS_ID, variable: 'AWS_ACCESS_KEY_ID'),
-                        string(credentialsId: env.SECRET_CREDENTIALS_ID, variable: 'AWS_SECRET_ACCESS_KEY')
+                steps {
+                    withCredentials([
+                        string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
                     ]) {
-                        sh "gcloud transfer jobs create \
-                            s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
+                        sh '''
+                            gcloud transfer jobs create s3://alfredo02711 gs://mi-bucket3 \
                             --source-auth-method=AWS_SIGNATURE_V4 \
                             --include-modified-after-relative=1d \
                             --schedule-repeats-every=1d \
-                            --aws-access-key-id=${AWS_ACCESS_KEY_ID} \
-                            --aws-secret-access-key=${AWS_SECRET_ACCESS_KEY}"
+                            --aws-access-key-id="$AWS_ACCESS_KEY_ID" \
+                            --aws-secret-access-key="$AWS_SECRET_ACCESS_KEY"
+                        '''
                     }
+                }
             }
-        }
     }
 }
