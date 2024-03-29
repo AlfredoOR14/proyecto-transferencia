@@ -8,6 +8,8 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket3'
         NAME_BUCKET_S3 = 'alfredo02711'
+        CREDENTIALS_ID = 'AWS_ACCESS_KEY_ID'
+        SECRET_CREDENTIALS_ID = 'AWS_SECRET_ACCESS_KEY'
     }
     stages {
         stage('Descarga de Fuentes') {
