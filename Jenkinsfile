@@ -5,6 +5,7 @@ pipeline {
         PROJECT_ID = 'devioz-pe-dev-analitica'
         ENVIRONMENT = 'dev'
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
+        AWS_SERVICE_ACCOUNT = 'AWS_SECRET_ID'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket3'
         NAME_BUCKET_S3 = 'alfredo02711'
@@ -45,17 +46,12 @@ pipeline {
         
         stage('Creacion de trasferencia de datos de AWS a GCP') {
                 steps {
-                    withCredentials([
-                        string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                        string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-                    ]) {
+                   withCredentials([file(credentialsId: "${AWS_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
                         sh '''
-                            gcloud transfer jobs create s3://alfredo02711 gs://mi-bucket3 \
-                            --source-auth-method=AWS_SIGNATURE_V4 \
+                            gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}\
+                            --source-creds-file=$SECRET_FILE\
                             --include-modified-after-relative=1d \
-                            --schedule-repeats-every=1d \
-                            --aws-access-key-id="$AWS_ACCESS_KEY_ID" \
-                            --aws-secret-access-key="$AWS_SECRET_ACCESS_KEY"
+                            --schedule-repeats-every=1d 
                         '''
                     }
                 }
