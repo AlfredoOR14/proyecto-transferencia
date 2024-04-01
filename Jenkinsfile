@@ -43,7 +43,7 @@ pipeline {
         }
         
         stage('Creacion de trasferencia de datos de AWS a GCP') {
-            steps {
+             steps {
                     withCredentials([file(credentialsId: "${AWS_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
                         sh '''
                             gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}\
@@ -51,13 +51,14 @@ pipeline {
                             --include-modified-after-relative=1d \
                             --schedule=batch \
                             --schedule-repeats-every=1d \
-                            --schedule-starts="2024-03-29T08:00:00" \  
+                            --schedule-starts="2024-03-29T08:00:00"   // Elimina el backslash aquí
                             --overwrite-when=different \
                             --delete-from=NEVER
                         '''
                     }
                 }
             }
+
         stage('Limpiando Workspace') {
             steps {
                 deleteDir()
