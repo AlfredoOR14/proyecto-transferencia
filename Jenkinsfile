@@ -7,7 +7,7 @@ pipeline {
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         AWS_SERVICE_ACCOUNT = 'AWS_SECRET_ID'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket-gcp'
+        NAME_BUCKET_GCP = 'mi-bucket-gcp-1'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
     }
     stages {
