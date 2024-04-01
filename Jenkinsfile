@@ -49,7 +49,6 @@ pipeline {
                             gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}\
                             --source-creds-file=$SECRET_FILE\
                             --include-modified-after-relative=1d \
-                            --schedule=batch \
                             --schedule-repeats-every=1d \
                             --schedule-starts="2024-03-29T08:00:00"   // Elimina el backslash aquí
                             --overwrite-when=different \
