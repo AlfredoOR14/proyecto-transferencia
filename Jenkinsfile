@@ -46,10 +46,11 @@ pipeline {
                 steps {
                    withCredentials([file(credentialsId: "${AWS_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
                         sh '''
-                            gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}\
-                            --source-creds-file=$SECRET_FILE\
-                            --include-modified-after-relative=1d \
-                            --schedule-repeats-every=1d 
+                            gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
+                            --source-creds-file=$SECRET_FILE \
+                            --overwrite-when=different \
+                            --schedule-repeats-every=2m \
+                            --schedule-repeats-until=2025-12-31
                         '''
                     }
                 }
