@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_ID = 'devioz-pe-dev-analitica'
+        PROJECT_ID = 'sura-pe-dev-analitica'
         NAME_SECRET = 'aws_Cred'
-        GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
+        GCP_SERVICE_ACCOUNT = 'sura-corporativo-gcp-devops-analitica-dev'
         AWS_SERVICE_ACCOUNT = 'AWS_SECRET_ID'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
