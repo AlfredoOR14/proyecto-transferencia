@@ -46,7 +46,7 @@ pipeline {
             steps {
                 script {
                     // Recupera las credenciales de AWS desde Cloud Secret Manager
-                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=aws_secret", returnStdout: true).trim()
+                    def awsCredentials = sh(script: 'gcloud secrets versions access latest --secret=aws_secret', returnStdout: true).trim()
         
                     // Crea la transferencia de datos utilizando las credenciales recuperadas
                     sh '''
@@ -59,6 +59,7 @@ pipeline {
                 }
             }
         }
+
         stage('Limpiando Workspace') {
             steps {
                 deleteDir()
