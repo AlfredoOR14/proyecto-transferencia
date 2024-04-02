@@ -42,26 +42,28 @@ pipeline {
             }
         }
         
-         stage('Creacion de trasferencia de datos de AWS a GCP') {
-                steps {
-                    script {
-                        // Recupera las credenciales de AWS desde Cloud Secret Manager
-                        def awsCredentials = sh(script: 'gcloud secrets versions access latest --secret=aws_Cred', returnStdout: true).trim()
-                        echo $awsCredentials
-                        // Escribir las credenciales en un archivo temporal
-                        def awsCredentialsFile = writeFile(file: 'aws_credentials.json', text: awsCredentials)
-                        echo $awsCredentialsFile
-                        // Crea la transferencia de datos utilizando las credenciales recuperadas
-                        sh '''
-                            gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
-                            --source-creds-file=${awsCredentialsFile} \
-                            --overwrite-when=different \
-                            --schedule-repeats-every=1h \
-                            --schedule-repeats-until=2025-12-31
-                        '''
-                    }
+        stage('Creacion de trasferencia de datos de AWS a GCP') {
+            steps {
+                script {
+                    // Recupera las credenciales de AWS desde Cloud Secret Manager
+                    def awsCredentials = sh(script: 'gcloud secrets versions access latest --secret=aws_Cred', returnStdout: true).trim()
+                    echo "Credenciales de AWS: ${awsCredentials}"
+                    
+                    // Escribir las credenciales en un archivo temporal
+                    def awsCredentialsFile = writeFile file: 'aws_credentials.json', text: awsCredentials
+                    echo "Archivo de credenciales de AWS: ${awsCredentialsFile}"
+                    
+                    // Crea la transferencia de datos utilizando las credenciales recuperadas
+                    sh """
+                        gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
+                        --source-creds-file=${awsCredentialsFile} \
+                        --overwrite-when=different \
+                        --schedule-repeats-every=1h \
+                        --schedule-repeats-until=2025-12-31
+                    """
                 }
             }
+        }
 
         stage('Limpiando Workspace') {
             steps {
