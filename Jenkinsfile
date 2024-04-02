@@ -58,7 +58,7 @@ pipeline {
             
             // Crea la transferencia de datos utilizando las credenciales recuperadas
          sh """
-    gcloud transfer jobs update s3://${NAME_BUCKET_S3} \
+    gcloud transfer jobs update transferJobs/2347364665222102168\
     --source-creds-file=${awsCredentialsFilePath} \
     --overwrite-when=different \
     --schedule-repeats-every=2h \
