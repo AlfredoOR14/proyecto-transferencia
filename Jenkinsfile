@@ -51,7 +51,6 @@ pipeline {
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
                     // Escribir las credenciales en el archivo
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    echo "Archivo de credenciales de AWS: ${awsCredentialsFilePath}"
                     // Crea la transferencia de datos utilizando las credenciales recuperadas
                     sh """
                         gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
