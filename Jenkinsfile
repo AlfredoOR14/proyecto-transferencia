@@ -57,12 +57,13 @@ pipeline {
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=1h \
+                        --schedule-start-time-of-day=13:00 \
                         --schedule-repeats-until=2025-12-31
                     """
                 }
             }
         }
-        
+
         stage('Limpiando Workspace') {
             steps {
                 deleteDir()
