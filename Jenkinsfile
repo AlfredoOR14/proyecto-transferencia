@@ -41,9 +41,11 @@ pipeline {
             }
         }
         
-        stage('Creacion de trasferencia de datos de AWS a GCP') {
+         stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
                 script {
+                    // Deshabilitar las solicitudes de activación de API
+                    env.CLOUDSDK_CORE_DISABLE_PROMPTS = 'true'
                     // Recupera las credenciales de AWS desde Cloud Secret Manager
                     def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
                     // Ruta al archivo donde se guardarán las credenciales
