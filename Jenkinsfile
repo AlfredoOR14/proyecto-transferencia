@@ -57,13 +57,14 @@ pipeline {
             echo "Archivo de credenciales de AWS: ${awsCredentialsFilePath}"
             
             // Crea la transferencia de datos utilizando las credenciales recuperadas
-            sh """
-                gcloud transfer jobs update s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
-                --source-creds-file=${awsCredentialsFilePath} \
-                --overwrite-when=different \
-                --schedule-repeats-every=2h \
-                --schedule-repeats-until=2025-12-31
-            """
+         sh """
+    gcloud transfer jobs update s3://${NAME_BUCKET_S3} \
+    --source-creds-file=${awsCredentialsFilePath} \
+    --overwrite-when=different \
+    --schedule-repeats-every=2h \
+    --schedule-repeats-until=2025-12-31
+"""
+
         }
     }
 }
