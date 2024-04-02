@@ -43,32 +43,30 @@ pipeline {
         }
         
      stage('Creacion de trasferencia de datos de AWS a GCP') {
-    steps {
-        script {
-            // Recupera las credenciales de AWS desde Cloud Secret Manager
-            def awsCredentials = sh(script: 'gcloud secrets versions access latest --secret=aws_Cred', returnStdout: true).trim()
-            echo "Credenciales de AWS: ${awsCredentials}"
-            
-            // Ruta al archivo donde se guardarán las credenciales
-            def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-            
-            // Escribir las credenciales en el archivo
-            writeFile file: awsCredentialsFilePath, text: awsCredentials
-            echo "Archivo de credenciales de AWS: ${awsCredentialsFilePath}"
-            
-            // Crea la transferencia de datos utilizando las credenciales recuperadas
-         sh """
-    gcloud transfer jobs update transferJobs/2347364665222102168\
-    --source-creds-file=${awsCredentialsFilePath} \
-    --overwrite-when=different \
-    --schedule-repeats-every=1h \
-    --schedule-repeats-until=2025-12-31
-"""
-
+            steps {
+                script {
+                    // Recupera las credenciales de AWS desde Cloud Secret Manager
+                    def awsCredentials = sh(script: 'gcloud secrets versions access latest --secret=aws_Cred', returnStdout: true).trim()
+                    
+                    // Ruta al archivo donde se guardarán las credenciales
+                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+                    
+                    // Escribir las credenciales en el archivo
+                    writeFile file: awsCredentialsFilePath, text: awsCredentials
+                    echo "Archivo de credenciales de AWS: ${awsCredentialsFilePath}"
+                    
+                    // Crea la transferencia de datos utilizando las credenciales recuperadas
+                 sh """
+                        gcloud transfer jobs update transferJobs/2347364665222102168\
+                        --source-creds-file=${awsCredentialsFilePath} \
+                        --overwrite-when=different \
+                        --schedule-repeats-every=1h \
+                        --schedule-repeats-until=2025-12-31
+                    """
+        
+                }
+            }
         }
-    }
-}
-
 
         stage('Limpiando Workspace') {
             steps {
