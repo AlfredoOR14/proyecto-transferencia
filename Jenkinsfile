@@ -57,7 +57,7 @@ pipeline {
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=1h \
-                        --schedule-starts="2024-04-02T13:00:00Z" \
+                        --schedule-starts="2024-04-02T12:30:00Z" \
                         --schedule-repeats-until=2025-12-31
                     """
                 }
