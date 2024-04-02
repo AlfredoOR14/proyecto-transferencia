@@ -47,10 +47,10 @@ pipeline {
                     script {
                         // Recupera las credenciales de AWS desde Cloud Secret Manager
                         def awsCredentials = sh(script: 'gcloud secrets versions access latest --secret=aws_Cred', returnStdout: true).trim()
-                        
+                        echo $awsCredentials
                         // Escribir las credenciales en un archivo temporal
                         def awsCredentialsFile = writeFile(file: 'aws_credentials.json', text: awsCredentials)
-                        
+                        echo $awsCredentialsFile
                         // Crea la transferencia de datos utilizando las credenciales recuperadas
                         sh '''
                             gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
