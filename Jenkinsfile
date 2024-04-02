@@ -61,7 +61,7 @@ pipeline {
     gcloud transfer jobs update transferJobs/2347364665222102168\
     --source-creds-file=${awsCredentialsFilePath} \
     --overwrite-when=different \
-    --schedule-repeats-every=2h \
+    --schedule-repeats-every=1h \
     --schedule-repeats-until=2025-12-31
 """
 
