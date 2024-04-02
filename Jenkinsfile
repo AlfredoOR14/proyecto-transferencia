@@ -4,8 +4,7 @@ pipeline {
     environment {
         PROJECT_ID = 'sura-pe-dev-zona-cruda'
         NAME_SECRET = 'aws_Cred'
-        GCP_SERVICE_ACCOUNT = 'sura-corporativo-gcp-devops-analitica-dev'
-        AWS_SERVICE_ACCOUNT = 'AWS_SECRET_ID'
+        GCP_SERVICE_ACCOUNT = 'sura-corporativo-gcp-devops-zona-cruda-dev'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
