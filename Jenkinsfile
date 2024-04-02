@@ -50,7 +50,8 @@ pipeline {
                     echo "Credenciales de AWS: ${awsCredentials}"
                     
                     // Escribir las credenciales en un archivo temporal
-                    def awsCredentialsFile = writeFile file: 'aws_credentials.json', text: awsCredentials
+                    def awsCredentialsFile = File.createTempFile('aws_credentials', '.json')
+                    awsCredentialsFile.write(awsCredentials)
                     echo "Archivo de credenciales de AWS: ${awsCredentialsFile}"
                     
                     // Crea la transferencia de datos utilizando las credenciales recuperadas
