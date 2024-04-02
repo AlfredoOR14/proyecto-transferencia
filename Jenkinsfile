@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         PROJECT_ID = 'devioz-pe-dev-analitica'
-        ENVIRONMENT = 'dev'
+        NAME_SECRET = 'aws_Cred'
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         AWS_SERVICE_ACCOUNT = 'AWS_SECRET_ID'
         GCP_LOCATION = 'us-central1'
@@ -46,7 +46,7 @@ pipeline {
             steps {
                 script {
                     // Recupera las credenciales de AWS desde Cloud Secret Manager
-                    def awsCredentials = sh(script: 'gcloud secrets versions access latest --secret=aws_Cred', returnStdout: true).trim()
+                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
                     // Ruta al archivo donde se guardarán las credenciales
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
                     // Escribir las credenciales en el archivo
