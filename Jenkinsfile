@@ -22,7 +22,7 @@ pipeline {
         stage('Activando Service Account') {
             steps {
                 withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
-                    sh "gcloud auth activate-service-account --key-file=${SECRET_FILE}"
+                    sh "gcloud auth activate-service-account --key-file=${SECRET_FILE}" || error 'Failed to activate GCP service account'
                 }
             }
         }
@@ -35,7 +35,7 @@ pipeline {
                     if (bucketExists != 0) {
                         echo "El bucket gs://${NAME_BUCKET_GCP} ya existe. No se creará otro."
                     } else {
-                        sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
+                        sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}" || error 'Failed to create GCP bucket'
                     }
                 }
             }
@@ -51,7 +51,7 @@ pipeline {
                         --schedule-repeats-every=1d \
                         --schedule-starts="2024-03-29T08:00:00" \
                         --overwrite-when=different \
-                        --delete-from=NEVER
+                        --delete-from=NEVER || error 'Failed to create transfer job'
                     """
                 }
             }
@@ -63,4 +63,17 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
 }
+
+def error(message) {
+    echo message
+    currentBuild.result = 'FAILURE'
+    error message
+}
+
