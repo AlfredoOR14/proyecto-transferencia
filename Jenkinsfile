@@ -41,27 +41,44 @@ pipeline {
             }
         }
                
-        stage('Creacion de trasferencia de datos de AWS a GCP') {
-            steps {
-                script {
-                    // Deshabilitar las solicitudes de activación de API
-                    env.CLOUDSDK_CORE_DISABLE_PROMPTS = 'true'
-                    // Recupera las credenciales de AWS desde Cloud Secret Manager
-                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                    // Ruta al archivo donde se guardarán las credenciales
-                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                    // Escribir las credenciales en el archivo
-                    writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    // Autenticarse con AWS
-                    sh "gcloud auth activate-service-account --key-file=${awsCredentialsFilePath}"
-        
-                    // Ejecutar el comando gsutil para copiar los datos de S3 a GCP
-                    sh """
-                        gsutil -o 'GSUtil:use_magicfile=True' cp -r s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}
-                    """
+            stage('Creacion de trasferencia de datos de AWS a GCP') {
+                steps {
+                    script {
+                        // Deshabilitar las solicitudes de activación de API
+                        env.CLOUDSDK_CORE_DISABLE_PROMPTS = 'true'
+            
+                        // Recupera las credenciales de AWS desde Cloud Secret Manager
+                        def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
+            
+                        // Ruta al archivo donde se guardarán las credenciales
+                        def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+            
+                        // Escribir las credenciales en el archivo
+                        writeFile file: awsCredentialsFilePath, text: awsCredentials
+            
+                        // Verificar si el archivo se ha creado correctamente
+                        if (fileExists(awsCredentialsFilePath)) {
+                            // Autenticarse con AWS utilizando el archivo de credenciales
+                            sh "gcloud auth activate-service-account --key-file=${awsCredentialsFilePath}"
+            
+                            // Verificar si la autenticación fue exitosa
+                            def authCheck = sh(script: 'gcloud auth list --filter=status:ACTIVE --format=value(account)', returnStdout: true).trim()
+                            if (authCheck) {
+                                echo "Autenticación con AWS exitosa."
+                            } else {
+                                error "La autenticación con AWS ha fallado."
+                            }
+            
+                            // Ejecutar el comando gsutil para copiar los datos de S3 a GCP
+                            sh """
+                                gsutil -o 'GSUtil:use_magicfile=True' cp -r s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}
+                            """
+                        } else {
+                            error "No se pudo crear el archivo de credenciales para AWS."
+                        }
+                    }
                 }
             }
-        }
 
         stage('Limpiando Workspace') {
             steps {
