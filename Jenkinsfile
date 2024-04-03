@@ -8,6 +8,7 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
+        AWS_REGION = 'us-east-1'
     }
     stages {
         stage('Descarga de Fuentes') {
@@ -58,7 +59,7 @@ pipeline {
             
                         // Copiar los datos de AWS S3 a una carpeta local temporal
                         sh """
-                            aws s3 cp s3://${NAME_BUCKET_S3} ${env.WORKSPACE}/temp --recursive --quiet --region=${GCP_LOCATION}
+                            aws s3 cp s3://${NAME_BUCKET_S3} ${env.WORKSPACE}/temp --recursive --quiet --region=${AWS_REGION}
                         """
             
                         // Verificar si la transferencia fue exitosa
