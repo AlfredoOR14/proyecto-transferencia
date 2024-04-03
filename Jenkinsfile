@@ -52,7 +52,10 @@ pipeline {
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
                     // Escribir las credenciales en el archivo
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    // Crea la transferencia de datos utilizando gsutil
+                    // Autenticarse con AWS
+                    sh "gcloud auth activate-service-account --key-file=${awsCredentialsFilePath}"
+        
+                    // Ejecutar el comando gsutil para copiar los datos de S3 a GCP
                     sh """
                         gsutil -o 'GSUtil:use_magicfile=True' cp -r s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}
                     """
