@@ -41,7 +41,7 @@ pipeline {
             }
         }
         
-         stage('Creacion de trasferencia de datos de AWS a GCP') {
+        stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
                 script {
                     // Deshabilitar las solicitudes de activación de API
