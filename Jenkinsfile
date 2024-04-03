@@ -33,9 +33,9 @@ pipeline {
                     sh "gcloud config set project ${PROJECT_ID}"
                     def bucketExists = sh(script: "gsutil ls gs://${NAME_BUCKET_GCP}", returnStatus: true)
                     if (bucketExists != 0) {
-                        sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
-                    } else {
                         echo "El bucket gs://${NAME_BUCKET_GCP} ya existe. No se creará otro."
+                    } else {
+                        sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
                     }
                 }
             }
@@ -52,13 +52,9 @@ pipeline {
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
                     // Escribir las credenciales en el archivo
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    // Crea la transferencia de datos utilizando las credenciales recuperadas
+                    // Crea la transferencia de datos utilizando gsutil
                     sh """
-                        gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
-                        --source-creds-file=${awsCredentialsFilePath} \
-                        --overwrite-when=different \
-                        --schedule-repeats-every=1h \
-                        --schedule-starts="2024-04-02T17:58:00Z" 
+                        gsutil -o 'GSUtil:use_magicfile=True' cp -r s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}
                     """
                 }
             }
