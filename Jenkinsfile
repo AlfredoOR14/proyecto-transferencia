@@ -50,12 +50,12 @@ pipeline {
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
                     
-                    // Verificar si el trabajo de transferencia existe y está activo
+                    // Verificar si el trabajo de transferencia existe
                     def transferInfo = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER}", returnStdout: true, returnStderr: true)
-                    if (transferInfo.contains("ERROR")) {
-                        echo "El trabajo de transferencia ${NAME_TRANSFER} no existe o está inactivo."
+                    if (transferInfo.contains("Transferjobs instance [${NAME_TRANSFER}] not found")) {
+                        echo "El trabajo de transferencia ${NAME_TRANSFER} no existe."
                     } else {
-                        // Eliminar el trabajo de transferencia si está activo
+                        // Eliminar el trabajo de transferencia si existe
                         sh "gcloud transfer jobs delete ${NAME_TRANSFER} --quiet"
                     }
                     
