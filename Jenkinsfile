@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_ID = 'HealthyLeaf'
+        PROJECT_ID = 'devioz-cloud'
         NAME_SECRET = 'aws_Cred'
-        GCP_SERVICE_ACCOUNT = 'HealthyLeaf_'
+        GCP_SERVICE_ACCOUNT = 'PRUEBA'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
