@@ -44,27 +44,14 @@ pipeline {
             }
         }
         
-        stage('Creacion de trasferencia de datos de AWS a GCP') {
+        stage('Transferencia de datos de AWS a GCP') {
             steps {
                 script {
-                    // Recupera las credenciales de AWS desde Cloud Secret Manager
-                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                    // Ruta al archivo donde se guardarán las credenciales
-                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                    // Escribir las credenciales en el archivo
-                    writeFile file: awsCredentialsFilePath, text: awsCredentials
-        
-                    // Verificar si ya existe un transfer job con el mismo nombre
-                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
-                    def valor = existingJob == 0 ? 'update' : 'create'
+                    // Descargar los datos de AWS S3
+                    sh "aws s3 cp s3://${NAME_BUCKET_AWS} /tmp/${NAME_BUCKET_AWS} --recursive"
                     
-                    sh """
-                        gcloud transfer jobs ${valor} ${NAME_TRANSFER} \
-                        --source-creds-file=${awsCredentialsFilePath} \
-                        --overwrite-when=different \
-                        --schedule-repeats-every=2h \
-                        --schedule-starts="2024-04-03T20:17:00Z"
-                    """
+                    // Subir los datos a Google Cloud Storage
+                    sh "gsutil -m cp -r /tmp/${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP}"
                 }
             }
         }
@@ -76,4 +63,5 @@ pipeline {
         }
     }
 }
+
 
