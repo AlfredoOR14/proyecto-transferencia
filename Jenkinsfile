@@ -6,9 +6,9 @@ pipeline {
         NAME_SECRET = 'aws_Cred'
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket-gcp-3'
+        NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
-        AWS_REGION = 'us-east-1'
+        NAME_TRANFER = 'PRUEBA'
     }
     stages {
         stage('Descarga de Fuentes') {
@@ -28,7 +28,7 @@ pipeline {
             }
         }
         
-         stage('Create Bucket in GCP') {
+        stage('Create Bucket in GCP') {
             steps {
                 script {
                     sh "gcloud config set project ${PROJECT_ID}"
@@ -41,54 +41,30 @@ pipeline {
                 }
             }
         }
-               
-           stage('Transferencia de datos de AWS S3 a GCP') {
-                steps {
-                    script {
-                        // Deshabilitar las solicitudes de activación de API
-                        env.CLOUDSDK_CORE_DISABLE_PROMPTS = 'true'
-            
-                        // Recupera las credenciales de AWS desde Cloud Secret Manager
-                        def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-            
-                        // Ruta al archivo donde se guardarán las credenciales
-                        def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-            
-                        // Escribir las credenciales en el archivo
-                        writeFile file: awsCredentialsFilePath, text: awsCredentials
-            
-                        // Copiar los datos de AWS S3 a una carpeta local temporal
-                        sh """
-                            aws s3 cp s3://${NAME_BUCKET_S3} ${env.WORKSPACE}/temp --recursive --quiet --region=${AWS_REGION}
-                        """
-            
-                        // Verificar si la transferencia fue exitosa
-                        def transferCheck = sh(script: "ls ${env.WORKSPACE}/temp", returnStatus: true)
-                        if (transferCheck == 0) {
-                            echo "Datos de AWS S3 transferidos con éxito a la carpeta temporal."
-            
-                            // Copiar los datos de la carpeta temporal a GCS
-                            sh """
-                                gsutil -m cp -r ${env.WORKSPACE}/temp gs://${NAME_BUCKET_GCP}
-                            """
-            
-                            // Verificar si la transferencia a GCS fue exitosa
-                            def gcsCheck = sh(script: "gsutil ls gs://${NAME_BUCKET_GCP}", returnStatus: true)
-                            if (gcsCheck == 0) {
-                                echo "Datos transferidos con éxito de AWS S3 a GCS."
-                            } else {
-                                error "La transferencia de datos a GCS ha fallado."
-                            }
-                        } else {
-                            error "La transferencia de datos desde AWS S3 ha fallado."
-                        }
-                    }
+        
+        stage('Creacion de trasferencia de datos de AWS a GCP') {
+            steps {
+                script {
+                    // Deshabilitar las solicitudes de activación de API
+                    env.CLOUDSDK_CORE_DISABLE_PROMPTS = 'true'
+                    // Recupera las credenciales de AWS desde Cloud Secret Manager
+                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
+                    // Ruta al archivo donde se guardarán las credenciales
+                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+                    // Escribir las credenciales en el archivo
+                    writeFile file: awsCredentialsFilePath, text: awsCredentials
+                    // Crea la transferencia de datos utilizando las credenciales recuperadas
                     sh """
-                    aws s3 cp s3://mi-bucket-aws-1 /var/lib/jenkins/workspace/proyecto-trasferencia/temp --recursive --quiet --region=us-east-1 > stdout.log 2> stderr.log
+                        gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
+                         --name=${NAME_TRANFER} \
+                        --source-creds-file=${awsCredentialsFilePath} \
+                        --overwrite-when=different \
+                        --schedule-repeats-every=1h \
+                        --schedule-starts="2024-04-02T17:58:00Z" 
                     """
-
                 }
             }
+        }
 
         stage('Limpiando Workspace') {
             steps {
