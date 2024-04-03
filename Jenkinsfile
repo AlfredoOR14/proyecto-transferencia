@@ -42,58 +42,41 @@ pipeline {
             }
         }
         
-         stage('Verificar y Actualizar Transferencia de Datos') {
-                steps {
-                    script {
-                        env.CLOUDSDK_CORE_DISABLE_PROMPTS = 'true'
-                        def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                        def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                        writeFile file: awsCredentialsFilePath, text: awsCredentials
-            
-                        // Verificar si el trabajo de transferencia existe
-                        def transferInfo = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER}", returnStdout: true, returnStatus: true)
-            
-                        if (transferInfo == 0) {
-                            // El trabajo de transferencia existe, verificar si está activo
-                            def transferStatus = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(status)'", returnStdout: true).trim()
-                            
-                            if (transferStatus == "DELETED") {
-                                // Si el trabajo está en estado "DELETED", crear uno nuevo
-                                echo "El trabajo de transferencia ${NAME_TRANSFER} está en estado 'DELETED'. Creando uno nuevo..."
-                                sh """
-                                    gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
-                                    --name=${NAME_TRANSFER} \
-                                    --source-creds-file=${awsCredentialsFilePath} \
-                                    --overwrite-when=different \
-                                    --schedule-repeats-every=1h \
-                                    --schedule-starts="2024-04-03T17:58:00Z"
-                                """
-                            } else {
-                                // Actualizar el trabajo de transferencia existente
-                                echo "El trabajo de transferencia ${NAME_TRANSFER} existe y está activo. Actualizando..."
-                                sh """
-                                    gcloud transfer jobs update ${NAME_TRANSFER} \
-                                    --source-creds-file=${awsCredentialsFilePath} \
-                                    --overwrite-when=different \
-                                    --schedule-repeats-every=1h \
-                                    --schedule-starts="2024-04-03T17:58:00Z"
-                                """
-                            }
-                        } else {
-                            // El trabajo de transferencia no existe, crear uno nuevo
-                            echo "El trabajo de transferencia ${NAME_TRANSFER} no existe. Creando uno nuevo..."
-                            sh """
-                                gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
-                                --name=${NAME_TRANSFER} \
-                                --source-creds-file=${awsCredentialsFilePath} \
-                                --overwrite-when=different \
-                                --schedule-repeats-every=1h \
-                                --schedule-starts="2024-04-03T17:58:00Z"
-                            """
-                        }
+         stage('Creacion de trasferencia de datos de AWS a GCP') {
+            steps {
+                script {
+                    // Recupera las credenciales de AWS desde Cloud Secret Manager
+                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
+                    // Ruta al archivo donde se guardarán las credenciales
+                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+                    // Escribir las credenciales en el archivo
+                    writeFile file: awsCredentialsFilePath, text: awsCredentials
+        
+                    // Verificar si ya existe un transfer job con el mismo nombre
+                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format=json", returnStdout: true, returnStatus: true)
+                    if (existingJob == 0) {
+                        // Actualizar el transfer job existente
+                        sh """
+                            gcloud transfer jobs update ${NAME_TRANSFER} \
+                            --source-creds-file=${awsCredentialsFilePath} \
+                            --overwrite-when=different \
+                            --schedule-repeats-every=1h \
+                            --schedule-starts="2024-04-02T14:00:00Z"
+                        """
+                    } else {
+                        // Crear un nuevo transfer job
+                        sh """
+                            gcloud transfer jobs create s3://${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP} \
+                            --source-creds-file=${awsCredentialsFilePath} \
+                            --name=${NAME_TRANSFER} \
+                            --overwrite-when=different \
+                            --schedule-repeats-every=1h \
+                            --schedule-starts="2024-04-02T14:00:00Z"
+                        """
                     }
                 }
             }
+        }
 
         stage('Limpiando Workspace') {
             steps {
