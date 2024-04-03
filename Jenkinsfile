@@ -9,7 +9,7 @@ pipeline {
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
         NAME_TRANSFER = 'PRUEBA1'
-        NAME_BUCKET_AWS = 'mi-bucket-aws-1' // Variable que faltaba
+        NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
     stages {
@@ -56,26 +56,15 @@ pipeline {
         
                     // Verificar si ya existe un transfer job con el mismo nombre
                     def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
-                    if (existingJob == 0) {
-
-                        sh """
-                            gcloud transfer jobs update ${NAME_TRANSFER} \
-                            --source-creds-file=${awsCredentialsFilePath} \
-                            --overwrite-when=different \
-                            --schedule-repeats-every=1h \
-                            --schedule-starts="2024-04-02T14:00:00Z"
-                        """
-                    } else {
-                        // Crear un nuevo transfer job
-                        sh """
-                            gcloud transfer jobs create s3://${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP} \
-                            --source-creds-file=${awsCredentialsFilePath} \
-                            --name=${NAME_TRANSFER} \
-                            --overwrite-when=different \
-                            --schedule-repeats-every=1h \
-                            --schedule-starts="2024-04-02T14:00:00Z"
-                        """
-                    }
+                    def valor = existingJob == 0 ? 'update' : 'create'
+                    
+                    sh """
+                        gcloud transfer jobs ${valor} ${NAME_TRANSFER} \
+                        --source-creds-file=${awsCredentialsFilePath} \
+                        --overwrite-when=different \
+                        --schedule-repeats-every=1h \
+                        --schedule-starts="2024-04-02T14:00:00Z"
+                    """
                 }
             }
         }
