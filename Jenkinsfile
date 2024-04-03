@@ -42,26 +42,30 @@ pipeline {
             }
         }
         
-        stage('Creacion de trasferencia de datos de AWS a GCP') {
+        stage('Verificar y Actualizar Transferencia de Datos') {
             steps {
                 script {
-                    // Deshabilitar las solicitudes de activación de API
                     env.CLOUDSDK_CORE_DISABLE_PROMPTS = 'true'
-                    // Recupera las credenciales de AWS desde Cloud Secret Manager
                     def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                    // Ruta al archivo donde se guardarán las credenciales
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                    // Escribir las credenciales en el archivo
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    // Crear o actualizar la transferencia de datos utilizando las credenciales recuperadas
+                    
+                    // Verificar si el trabajo de transferencia ya existe
+                    def transferExists = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER}", returnStatus: true)
+                    
+                    // Si el trabajo de transferencia existe, eliminarlo antes de crear uno nuevo
+                    if (transferExists == 0) {
+                        sh "gcloud transfer jobs delete ${NAME_TRANSFER} --quiet"
+                    }
+                    
+                    // Crear el nuevo trabajo de transferencia
                     sh """
                         gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
-                         --name=${NAME_TRANSFER} \
+                        --name=${NAME_TRANSFER} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=1h \
-                        --schedule-starts="2024-04-03T17:58:00Z" \
-                        --update
+                        --schedule-starts="2024-04-03T17:58:00Z"
                     """
                 }
             }
