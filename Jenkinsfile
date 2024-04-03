@@ -9,7 +9,9 @@ pipeline {
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
         NAME_TRANSFER = 'PRUEBA1'
+        NAME_BUCKET_AWS = 'mi-bucket-aws-1' // Variable que faltaba
     }
+
     stages {
         stage('Descarga de Fuentes') {
             steps {
@@ -42,7 +44,7 @@ pipeline {
             }
         }
         
-         stage('Creacion de trasferencia de datos de AWS a GCP') {
+        stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
                 script {
                     // Recupera las credenciales de AWS desde Cloud Secret Manager
@@ -85,3 +87,4 @@ pipeline {
         }
     }
 }
+
