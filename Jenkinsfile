@@ -47,18 +47,25 @@ pipeline {
         stage('Transferencia de datos de AWS a GCP') {
             steps {
                 script {
-                    // Recupera las credenciales de AWS desde Cloud Secret Manager
-                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                    // Ruta al archivo donde se guardarán las credenciales
-                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                    // Escribir las credenciales en el archivo
-                    writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    
-                    // Descargar los datos de AWS S3
-                    sh "AWS_SHARED_CREDENTIALS_FILE=${awsCredentialsFilePath} aws s3 cp s3://${NAME_BUCKET_AWS} /tmp/${NAME_BUCKET_AWS} --recursive"
-                    
-                    // Subir los datos a Google Cloud Storage
-                    sh "gsutil -m cp -r /tmp/${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP}"
+                    try {
+                        // Recupera las credenciales de AWS desde Cloud Secret Manager
+                        def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
+                        // Ruta al archivo donde se guardarán las credenciales
+                        def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+                        // Escribir las credenciales en el archivo
+                        writeFile file: awsCredentialsFilePath, text: awsCredentials
+
+                        // Descargar los datos de AWS S3
+                        sh "AWS_SHARED_CREDENTIALS_FILE=${awsCredentialsFilePath} aws s3 cp s3://${NAME_BUCKET_AWS} /tmp/${NAME_BUCKET_AWS} --recursive"
+
+                        // Subir los datos a Google Cloud Storage
+                        sh "gsutil -m cp -r /tmp/${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP}"
+                    } catch (Exception e) {
+                        error("Error durante la transferencia de datos: ${e.message}")
+                    } finally {
+                        // Limpiar el directorio temporal
+                        sh "rm -rf /tmp/${NAME_BUCKET_AWS}"
+                    }
                 }
             }
         }
