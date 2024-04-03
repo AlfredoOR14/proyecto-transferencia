@@ -58,7 +58,7 @@ pipeline {
             
                         // Copiar los datos de AWS S3 a una carpeta local temporal
                         sh """
-                            aws s3 cp s3://${NAME_BUCKET_S3} ${env.WORKSPACE}/temp --recursive --quiet --region=${AWS_REGION}
+                            aws s3 cp s3://${NAME_BUCKET_S3} ${env.WORKSPACE}/temp --recursive --quiet --region=${GCP_LOCATION}
                         """
             
                         // Verificar si la transferencia fue exitosa
