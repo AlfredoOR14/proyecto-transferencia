@@ -41,7 +41,7 @@ pipeline {
             }
         }
                
-            stage('Creacion de trasferencia de datos de AWS a GCP') {
+           stage('Transferencia de datos de AWS S3 a GCP') {
                 steps {
                     script {
                         // Deshabilitar las solicitudes de activación de API
@@ -56,25 +56,30 @@ pipeline {
                         // Escribir las credenciales en el archivo
                         writeFile file: awsCredentialsFilePath, text: awsCredentials
             
-                        // Verificar si el archivo se ha creado correctamente
-                        if (fileExists(awsCredentialsFilePath)) {
-                            // Autenticarse con AWS utilizando el archivo de credenciales
-                            sh "gcloud auth activate-service-account --key-file=${awsCredentialsFilePath}"
+                        // Copiar los datos de AWS S3 a una carpeta local temporal
+                        sh """
+                            aws s3 cp s3://${NAME_BUCKET_S3} ${env.WORKSPACE}/temp --recursive --quiet --region=${AWS_REGION}
+                        """
             
-                            // Verificar si la autenticación fue exitosa
-                            def authCheck = sh(script: 'gcloud auth list --filter=status:ACTIVE --format=value(account)', returnStdout: true).trim()
-                            if (authCheck) {
-                                echo "Autenticación con AWS exitosa."
-                            } else {
-                                error "La autenticación con AWS ha fallado."
-                            }
+                        // Verificar si la transferencia fue exitosa
+                        def transferCheck = sh(script: "ls ${env.WORKSPACE}/temp", returnStatus: true)
+                        if (transferCheck == 0) {
+                            echo "Datos de AWS S3 transferidos con éxito a la carpeta temporal."
             
-                            // Ejecutar el comando gsutil para copiar los datos de S3 a GCP
+                            // Copiar los datos de la carpeta temporal a GCS
                             sh """
-                                gsutil -o 'GSUtil:use_magicfile=True' cp -r s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}
+                                gsutil -m cp -r ${env.WORKSPACE}/temp gs://${NAME_BUCKET_GCP}
                             """
+            
+                            // Verificar si la transferencia a GCS fue exitosa
+                            def gcsCheck = sh(script: "gsutil ls gs://${NAME_BUCKET_GCP}", returnStatus: true)
+                            if (gcsCheck == 0) {
+                                echo "Datos transferidos con éxito de AWS S3 a GCS."
+                            } else {
+                                error "La transferencia de datos a GCS ha fallado."
+                            }
                         } else {
-                            error "No se pudo crear el archivo de credenciales para AWS."
+                            error "La transferencia de datos desde AWS S3 ha fallado."
                         }
                     }
                 }
