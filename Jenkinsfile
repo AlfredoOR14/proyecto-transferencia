@@ -8,7 +8,7 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
-        NAME_TRANFER = 'PRUEBA'
+        NAME_TRANSFER = 'PRUEBA'
     }
     stages {
         stage('Descarga de Fuentes') {
@@ -53,14 +53,15 @@ pipeline {
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
                     // Escribir las credenciales en el archivo
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    // Crea la transferencia de datos utilizando las credenciales recuperadas
+                    // Crear o actualizar la transferencia de datos utilizando las credenciales recuperadas
                     sh """
                         gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} \
-                         --name=${NAME_TRANFER} \
+                         --name=${NAME_TRANSFER} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=1h \
-                        --schedule-starts="2024-04-02T17:58:00Z" 
+                        --schedule-starts="2024-04-03T17:58:00Z" \
+                        --update
                     """
                 }
             }
