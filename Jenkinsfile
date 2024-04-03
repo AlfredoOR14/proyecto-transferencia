@@ -53,9 +53,9 @@ pipeline {
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
         
                     // Verificar si ya existe un transfer job con el mismo nombre
-                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format=json", returnStdout: true, returnStatus: true)
+                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format="value(name)", returnStdout: true, returnStatus: true)
                     if (existingJob == 0) {
-                        // Actualizar el transfer job existente
+
                         sh """
                             gcloud transfer jobs update ${NAME_TRANSFER} \
                             --source-creds-file=${awsCredentialsFilePath} \
