@@ -83,6 +83,10 @@ pipeline {
                             error "La transferencia de datos desde AWS S3 ha fallado."
                         }
                     }
+                    sh """
+                    aws s3 cp s3://mi-bucket-aws-1 /var/lib/jenkins/workspace/proyecto-trasferencia/temp --recursive --quiet --region=us-east-1 > stdout.log 2> stderr.log
+                    """
+
                 }
             }
 
