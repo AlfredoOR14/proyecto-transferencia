@@ -53,23 +53,28 @@ pipeline {
                     def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
                     // Escribir las credenciales en el archivo
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
-        
+                    
+                    // Definir la variable COMANDO fuera del bloque if-else
+                    def COMANDO
+                    
                     // Verificar si ya existe un transfer job con el mismo nombre
                     def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
-                    def valor = existingJob == 0 ? 'update' : 'create'
+                    if(existingJob == 0) {
+                        // Si el trabajo ya existe, actualízalo
+                        COMANDO = "gcloud transfer jobs update ${NAME_TRANSFER}"
+                    } else { 
+                        // Si el trabajo no existe, créalo
+                        COMANDO = "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}"
+                    }
                     
+                    // Crear o actualizar el trabajo de transferencia
                     sh """
-                        gcloud transfer jobs create ${NAME_TRANSFER} \
+                        ${COMANDO} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=2h \
-                        --schedule-starts="2024-04-03T20:17:00Z" \
-                        --project=${PROJECT_ID} \
-                        --description="Descripción opcional del trabajo" \
-                        --source-s3-bucket-name=${NAME_BUCKET_S3} \
-                        --destination-bucket=${NAME_BUCKET_GCP}
+                        --schedule-starts="2024-04-03T20:17:00Z" 
                     """
-
                 }
             }
         }
