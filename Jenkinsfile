@@ -7,9 +7,7 @@ pipeline {
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-10'
-        NAME_BUCKET_S3 = 'mi-bucket-aws-1'
         NAME_TRANSFER = 'tranferenciaprueba'
-        NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
     stages {
@@ -25,7 +23,7 @@ pipeline {
         stage('Activando Service Account') {
             steps {
                 withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
-                    sh """\$(gcloud auth activate-service-account --key-file=\$SECRET_FILE)"""
+                    sh "gcloud auth activate-service-account --key-file=${SECRET_FILE}"
                 }
             }
         }
@@ -44,7 +42,7 @@ pipeline {
             }
         }
         
-        stage('Creacion de trasferencia de datos de AWS a GCP') {
+        stage('Creacion de transferencia de datos de AWS a GCP') {
             steps {
                 script {
                     // Recupera las credenciales de AWS desde Cloud Secret Manager
@@ -55,7 +53,7 @@ pipeline {
                     writeFile file: awsCredentialsFilePath, text: awsCredentials
         
                     // Verificar si ya existe un transfer job con el mismo nombre
-                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
+                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStatus: true)
                     def valor = existingJob == 0 ? 'update' : 'create'
                     
                     sh """
@@ -63,7 +61,8 @@ pipeline {
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=2h \
-                        --schedule-starts="2024-04-03T20:17:00Z"
+                        --schedule-starts="2024-04-03T20:17:00Z" \
+                        --project=${PROJECT_ID}
                     """
                 }
             }
