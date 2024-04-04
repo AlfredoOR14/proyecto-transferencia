@@ -59,14 +59,17 @@ pipeline {
                     def valor = existingJob == 0 ? 'update' : 'create'
                     
                     sh """
-                        gcloud transfer jobs ${valor} ${NAME_TRANSFER} \
+                        gcloud transfer jobs create ${NAME_TRANSFER} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=2h \
                         --schedule-starts="2024-04-03T20:17:00Z" \
                         --project=${PROJECT_ID} \
-                        s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}
+                        --description="Descripción opcional del trabajo" \
+                        --source-s3-bucket-name=${NAME_BUCKET_S3} \
+                        --destination-bucket=${NAME_BUCKET_GCP}
                     """
+
                 }
             }
         }
