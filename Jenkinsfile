@@ -70,6 +70,7 @@ pipeline {
                     // Crear o actualizar el trabajo de transferencia
                     sh """
                         ${COMANDO} \
+                        --name=${NAME_TRANSFER} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=2h \
