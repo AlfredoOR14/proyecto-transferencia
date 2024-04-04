@@ -63,7 +63,9 @@ pipeline {
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=2h \
-                        --schedule-starts="2024-04-03T20:17:00Z"
+                        --schedule-starts="2024-04-03T20:17:00Z" \
+                        --project=${PROJECT_ID} \
+                        s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}
                     """
                 }
             }
