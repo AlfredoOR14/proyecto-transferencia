@@ -6,9 +6,9 @@ pipeline {
         NAME_SECRET = 'aws_Cred'
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
+        NAME_BUCKET_GCP = 'mi-bucket-gcp-10'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
-        NAME_TRANSFER = 'PRUEBA1'
+        NAME_TRANSFER = 'tranferenciaprueba'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
@@ -44,28 +44,27 @@ pipeline {
             }
         }
         
-        stage('Transferencia de datos de AWS a GCP') {
+        stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
                 script {
-                    try {
-                        // Recupera las credenciales de AWS desde Cloud Secret Manager
-                        def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                        // Ruta al archivo donde se guardarán las credenciales
-                        def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                        // Escribir las credenciales en el archivo
-                        writeFile file: awsCredentialsFilePath, text: awsCredentials
-
-                        // Descargar los datos de AWS S3
-                        sh "AWS_SHARED_CREDENTIALS_FILE=${awsCredentialsFilePath} aws s3 cp s3://${NAME_BUCKET_AWS} /tmp/${NAME_BUCKET_AWS} --recursive"
-
-                        // Subir los datos a Google Cloud Storage
-                        sh "gsutil -m cp -r /tmp/${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP}"
-                    } catch (Exception e) {
-                        error("Error durante la transferencia de datos: ${e.message}")
-                    } finally {
-                        // Limpiar el directorio temporal
-                        sh "rm -rf /tmp/${NAME_BUCKET_AWS}"
-                    }
+                    // Recupera las credenciales de AWS desde Cloud Secret Manager
+                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
+                    // Ruta al archivo donde se guardarán las credenciales
+                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+                    // Escribir las credenciales en el archivo
+                    writeFile file: awsCredentialsFilePath, text: awsCredentials
+        
+                    // Verificar si ya existe un transfer job con el mismo nombre
+                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
+                    def valor = existingJob == 0 ? 'update' : 'create'
+                    
+                    sh """
+                        gcloud transfer jobs ${valor} ${NAME_TRANSFER} \
+                        --source-creds-file=${awsCredentialsFilePath} \
+                        --overwrite-when=different \
+                        --schedule-repeats-every=2h \
+                        --schedule-starts="2024-04-03T20:17:00Z"
+                    """
                 }
             }
         }
