@@ -8,7 +8,7 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
-        NAME_TRANSFER = 'PRUEBA1'
+        NAME_TRANSFER = 'PRUEBA3'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
