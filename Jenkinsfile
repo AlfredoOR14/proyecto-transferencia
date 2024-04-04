@@ -8,7 +8,7 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-2'
         NAME_BUCKET_S3 = 'mi-bucket-aws-1'
-        NAME_TRANSFER = 'PRUEBA2'
+        NAME_TRANSFER = 'PRUEBA1'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
@@ -62,8 +62,8 @@ pipeline {
                         gcloud transfer jobs ${valor} ${NAME_TRANSFER} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
-                        --schedule-repeats-every=1h \
-                        --schedule-starts="2024-04-02T14:00:00Z"
+                        --schedule-repeats-every=2h \
+                        --schedule-starts="2024-04-03T20:17:00Z"
                     """
                 }
             }
