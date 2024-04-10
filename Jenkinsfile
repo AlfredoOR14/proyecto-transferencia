@@ -69,6 +69,7 @@ pipeline {
                         if(existingJob == 0) {
                             // Si el trabajo ya existe, actualízalo
                             COMANDO = "gcloud transfer jobs update ${NAME_TRANSFER}"
+                             NOMBRE = ""
                         } else { 
                             // Si el trabajo no existe, créalo
                             COMANDO = "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}"
