@@ -71,12 +71,13 @@ pipeline {
                         } else { 
                             // Si el trabajo no existe, créalo
                             COMANDO = "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}"
+                            def nombre = "--name=${NAME_TRANSFER}"
                         }
                         
                         // Crear o actualizar el trabajo de transferencia
                         sh """
                             ${COMANDO} \
-                            --name=${NAME_TRANSFER} \
+                             $nombre \
                             --source-creds-file=${awsCredentialsFilePath} \
                             --overwrite-when=different \
                             --schedule-repeats-every=2h \
