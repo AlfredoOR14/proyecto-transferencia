@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         PROJECT_ID = 'devioz-pe-dev-analitica'
-        NAME_SECRET = 'aws_Cred'
+        NAME_SECRET = 'awss'
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-5'
