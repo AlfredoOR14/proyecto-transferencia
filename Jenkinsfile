@@ -62,6 +62,7 @@ pipeline {
                         
                         // Definir la variable COMANDO fuera del bloque if-else
                         def COMANDO
+                        def NOMBRE
                         
                         // Verificar si ya existe un transfer job con el mismo nombre
                         def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
@@ -71,13 +72,13 @@ pipeline {
                         } else { 
                             // Si el trabajo no existe, créalo
                             COMANDO = "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}"
-                            def nombre = "--name=${NAME_TRANSFER} \"
+                            NOMBRE = "--name=${NAME_TRANSFER} \"
                         }
                         
                         // Crear o actualizar el trabajo de transferencia
                         sh """
                             ${COMANDO} \
-                             ${nombre}
+                             ${NOMBRE}
                             --source-creds-file=${awsCredentialsFilePath} \
                             --overwrite-when=different \
                             --schedule-repeats-every=2h \
