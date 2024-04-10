@@ -16,16 +16,22 @@ pipeline {
         stage('Descarga de Fuentes') {
             steps {
                 script {
+                    echo 'Iniciando la etapa de Descarga de Fuentes...'
                     deleteDir()
                     checkout scm
+                    echo 'Descarga de Fuentes completada.'
                 }
             }
         }
 
         stage('Activando Service Account') {
             steps {
-                withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
-                    sh """\$(gcloud auth activate-service-account --key-file=\$SECRET_FILE)"""
+                script {
+                    echo 'Iniciando la etapa de Activando Service Account...'
+                    withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
+                        sh """\$(gcloud auth activate-service-account --key-file=\$SECRET_FILE)"""
+                    }
+                    echo 'Service Account activada correctamente.'
                 }
             }
         }
@@ -33,10 +39,12 @@ pipeline {
         stage('Create Bucket in GCP') {
             steps {
                 script {
+                    echo 'Iniciando la etapa de Creacion de Bucket en GCP...'
                     sh "gcloud config set project ${PROJECT_ID}"
                     def bucketExists = sh(script: "gsutil ls gs://${NAME_BUCKET_GCP}", returnStatus: true)
                     if (bucketExists != 0) {
                         sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
+                        echo 'Bucket en GCP creado correctamente.'
                     } else {
                         echo "El bucket gs://${NAME_BUCKET_GCP} ya existe. No se creará otro."
                     }
@@ -47,6 +55,7 @@ pipeline {
         stage('Creacion de trasferencia de datos de AWS a GCP') {
             steps {
                 script {
+                    echo 'Iniciando la etapa de Creacion de trasferencia de datos de AWS a GCP...'
                     // Recupera las credenciales de AWS desde Cloud Secret Manager
                     def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
                     // Ruta al archivo donde se guardarán las credenciales
@@ -76,14 +85,18 @@ pipeline {
                         --schedule-repeats-every=2h \
                         --schedule-starts="2024-04-03T20:17:00Z" 
                     """
+                    echo 'Transferencia de datos de AWS a GCP completada.'
                 }
             }
         }
 
         stage('Limpiando Workspace') {
             steps {
+                echo 'Iniciando la etapa de Limpiando Workspace...'
                 deleteDir()
+                echo 'Workspace limpiado.'
             }
         }
     }
 }
+
