@@ -51,44 +51,46 @@ pipeline {
                 }
             }
         }
-        
-        stage('Creacion de trasferencia de datos de AWS a GCP') {
-            steps {
-                script {
-                    echo 'Iniciando la etapa de Creacion de trasferencia de datos de AWS a GCP...'
-                    // Recupera las credenciales de AWS desde Cloud Secret Manager
-                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                    // Ruta al archivo donde se guardarán las credenciales
-                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                    // Escribir las credenciales en el archivo
-                    writeFile file: awsCredentialsFilePath, text: awsCredentials
-                    
-                    // Definir la variable COMANDO fuera del bloque if-else
-                    def COMANDO
-                    
-                    // Verificar si ya existe un transfer job con el mismo nombre
-                    def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
-                    if(existingJob == 0) {
-                        // Si el trabajo ya existe, actualízalo
-                        COMANDO = "gcloud transfer jobs update ${NAME_TRANSFER}"
-                    } else { 
-                        // Si el trabajo no existe, créalo
-                        COMANDO = "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}"
-                    }
-                    
-                    // Crear o actualizar el trabajo de transferencia
-                    sh """
-                        ${COMANDO} \
-                        --name=${NAME_TRANSFER} \
-                        --source-creds-file=${awsCredentialsFilePath} \
-                        --overwrite-when=different \
-                        --schedule-repeats-every=2h \
-                        --schedule-starts="2024-04-03T20:17:00Z" 
-                    """
-                    echo 'Transferencia de datos de AWS a GCP completada.'
-                }
+       stage('Creacion de trasferencia de datos de AWS a GCP') {
+    steps {
+        script {
+            // Recupera las credenciales de AWS desde Cloud Secret Manager
+            def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
+            
+            // Imprimir las credenciales
+            echo "Credenciales de AWS:"
+            echo awsCredentials
+            
+            // Ruta al archivo donde se guardarán las credenciales
+            def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+            // Escribir las credenciales en el archivo
+            writeFile file: awsCredentialsFilePath, text: awsCredentials
+            
+            // Definir la variable COMANDO fuera del bloque if-else
+            def COMANDO
+            
+            // Verificar si ya existe un transfer job con el mismo nombre
+            def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
+            if(existingJob == 0) {
+                // Si el trabajo ya existe, actualízalo
+                COMANDO = "gcloud transfer jobs update ${NAME_TRANSFER}"
+            } else { 
+                // Si el trabajo no existe, créalo
+                COMANDO = "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}"
             }
+            
+            // Crear o actualizar el trabajo de transferencia
+            sh """
+                ${COMANDO} \
+                --name=${NAME_TRANSFER} \
+                --source-creds-file=${awsCredentialsFilePath} \
+                --overwrite-when=different \
+                --schedule-repeats-every=2h \
+                --schedule-starts="2024-04-03T20:17:00Z" 
+            """
         }
+    }
+}
 
         stage('Limpiando Workspace') {
             steps {
