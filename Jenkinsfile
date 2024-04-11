@@ -65,7 +65,7 @@ pipeline {
                         --schedule-repeats-every=1h \
                         --schedule-starts="2024-04-11T19:30:00Z" \
                         --schedule-end-date="2024-04-30" \
-                        --schedule-end-time="12:30:00"
+                        --schedule-repeats-until="2024-04-30T12:30:00Z"
                     """
                 }
             }
