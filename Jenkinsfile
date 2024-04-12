@@ -6,9 +6,9 @@ pipeline {
         NAME_SECRET = 'awss'
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp-gcp'
+        NAME_BUCKET_GCP = 'bucket-12321a'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
-        NAME_TRANSFER = 'PRUEBAS11'
+        NAME_TRANSFER = 'PRUEBAS12'
     }
 
 
