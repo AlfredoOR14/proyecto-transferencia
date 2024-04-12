@@ -7,10 +7,10 @@ pipeline {
         GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp-gcp'
-        NAME_BUCKET_S3 = 'mi-bucket-aws-1'
+        NAME_BUCKET_AWS = 'mi-bucket-aws-1'
         NAME_TRANSFER = 'PRUEBAS11'
-        NAME_BUCKET_AWS = 'mi-bucket-aws-12'
     }
+
 
       stages {
             stage('Descarga de Fuentes') {
@@ -22,11 +22,9 @@ pipeline {
 
             stage('Activando Service Account') {
                 steps {
-                    echo 'Iniciando la etapa de Activando Service Account...'
                     withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
-                        sh "gcloud auth activate-service-account --key-file=\$SECRET_FILE"
+                        sh """\$(gcloud auth activate-service-account --key-file=\$SECRET_FILE)"""
                     }
-                    echo 'Service Account activada correctamente.'
                 }
             }
 
@@ -46,7 +44,7 @@ pipeline {
                 }
             }
 
-            stage('Creacion de trasferencia de datos de AWS a GCP') {
+             stage('Creacion de trasferencia de datos de AWS a GCP') {
                   steps {
                     script {
                        def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
@@ -56,15 +54,15 @@ pipeline {
                        def command = "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'"
                        def existingJob = sh(script: command, returnStdout: true, returnStatus: true)
                     
-                         command = existingJob == 0 ? "gcloud transfer jobs update ${NAME_TRANSFER}" : "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP} --name=${NAME_TRANSFER}"
+                         command = existingJob == 0 ? "gcloud transfer jobs update ${NAME_TRANSFER}" : "gcloud transfer jobs create s3://${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP} --name=${NAME_TRANSFER}"
                     
                     sh """
                         ${command} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
                         --schedule-repeats-every=1d \
-                        --schedule-starts="2024-04-11T19:30:00Z" \
-                        --schedule-repeats-until="2024-04-30T12:30:00Z"
+                        --schedule-starts="2024-04-11T12:30:00Z" \
+                        --schedule-repeats-until="2024-06-30T13:30:00Z"
                     """
                 }
             }
