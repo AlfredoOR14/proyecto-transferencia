@@ -8,7 +8,7 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'bucket-12321a'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
-        NAME_TRANSFER = 'PRUEBAS12'
+        NAME_TRANSFER = 'trasfer-job-aws-gcp'
     }
 
 
@@ -60,8 +60,8 @@ pipeline {
                         ${command} \
                         --source-creds-file=${awsCredentialsFilePath} \
                         --overwrite-when=different \
-                        --schedule-repeats-every=1d \
-                        --schedule-starts="2024-04-11T12:30:00Z" \
+                        --schedule-repeats-every=1h \
+                        --schedule-starts="2024-04-11T17:52:00Z" \
                         --schedule-repeats-until="2024-06-30T13:30:00Z"
                     """
                 }
