@@ -5,11 +5,10 @@ pipeline {
         PROJECT_ID = 'devioz-pe-test-analitica'
         NAME_SECRET = 'awss'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp'
+        NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp1'
         GCP_SERVICE_ACCOUNT = 'devioz-pe-test-analitica'
-        NAME_TRANSFER = 'TRANSFER'
+        NAME_TRANSFER = 'TRANSFER1'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
-        SERVICE_ACCOUNT_NAME = "project-${PROJECT_ID}@storage-transfer-service.iam.gserviceaccount.com"
     }
 
     stages {
