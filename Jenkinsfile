@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_ID = 'devioz-pe-test-analitica'
+        PROJECT_ID = 'devioz-pe-desa-analitica'
         NAME_SECRET = 'awss'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp1'
-        GCP_SERVICE_ACCOUNT = 'devioz-pe-test-analitica'
+        GCP_SERVICE_ACCOUNT = 'devioz-pe-desa-analitica'
         NAME_TRANSFER = 'TRANSFER2'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
@@ -71,7 +71,6 @@ pipeline {
                     --overwrite-when=different \
                     --schedule-repeats-every=1d \
                     --schedule-starts="2024-04-11T12:30:00Z" \
-                    --impersonate-service-account=devioz-pe-test-analitica@devioz-pe-test-analitica.iam.gserviceaccount.com \
                     --schedule-repeats-until="2024-07-31T13:30:00Z" 
                     """
                 }
