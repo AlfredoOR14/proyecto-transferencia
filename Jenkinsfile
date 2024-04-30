@@ -7,7 +7,7 @@ pipeline {
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp1'
         GCP_SERVICE_ACCOUNT = 'devioz-pe-test-analitica'
-        NAME_TRANSFER = 'TRANSFER1'
+        NAME_TRANSFER = 'TRANSFER2'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
