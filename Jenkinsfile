@@ -9,6 +9,7 @@ pipeline {
         GCP_SERVICE_ACCOUNT = 'devioz-pe-desa-analitica'
         NAME_TRANSFER = 'TRANSFER3'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
+        STORAGE_SERVICE_ACCOUNT = 'project-1073031677866@storage-transfer-service.iam.gserviceaccount.com'
     }
 
     stages {
@@ -18,17 +19,7 @@ pipeline {
                 checkout scm
             }
         }
-/*
-        stage('Creación de cuenta de servicio') {
-            steps {
-                script {
-                    echo 'Creando cuenta de servicio en Google Cloud...'
-                    sh "gcloud iam service-accounts create ${SERVICE_ACCOUNT_NAME} --description='Service account for data transfer' --display-name='Data Transfer Service Account'"
-                    sh "gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${SERVICE_ACCOUNT_NAME} --role=roles/storage.admin"
-                }
-            }
-        }
-*/
+
         stage('Activando Service Account') {
             steps {
                 withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
@@ -46,6 +37,13 @@ pipeline {
                     if (bucketExists != 0) {
                         sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
                         echo 'Bucket en GCP creado correctamente.'
+
+                        // Agregar permiso de administrador de objetos de Storage a la cuenta de servicio
+                        sh """
+                        gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+                            --member=serviceAccount:${STORAGE_SERVICE_ACCOUNT} \
+                            --role=roles/storage.admin
+                        """
                     } else {
                         echo "El bucket gs://${NAME_BUCKET_GCP} ya existe. No se creará otro."
                     }
@@ -84,4 +82,3 @@ pipeline {
         }
     }
 }
-
