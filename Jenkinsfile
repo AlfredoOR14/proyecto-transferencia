@@ -71,7 +71,7 @@ pipeline {
                     --overwrite-when=different \
                     --schedule-repeats-every=1d \
                     --schedule-starts="2024-04-11T12:30:00Z" \
-                    --transfer-spec-service-account=devioz-pe-test-analitica@devioz-pe-test-analitica.iam.gserviceaccount.com \
+                    --impersonate-service-account=devioz-pe-test-analitica@devioz-pe-test-analitica.iam.gserviceaccount.com \
                     --schedule-repeats-until="2024-07-31T13:30:00Z" 
                     """
                 }
