@@ -19,7 +19,7 @@ pipeline {
                 checkout scm
             }
         }
-
+/*
         stage('Creación de cuenta de servicio') {
             steps {
                 script {
@@ -29,7 +29,7 @@ pipeline {
                 }
             }
         }
-
+*/
         stage('Activando Service Account') {
             steps {
                 withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
