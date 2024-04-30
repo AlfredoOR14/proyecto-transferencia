@@ -2,42 +2,45 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_ID = 'devioz-pe-dev-analitica'
+        PROJECT_ID = 'devioz-pe-test-analitica'
         NAME_SECRET = 'awss'
-        GCP_SERVICE_ACCOUNT = 'devioz-corporativo-gcp-devops-analitica-dev'
+        GCP_SERVICE_ACCOUNT = 'devioz-pe-test-analitica'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp'
-        NAME_BUCKET_S3 = 'mi-bucket-aws-1'
-        NAME_TRANSFER = 'PRUEBAS10'
+        NAME_TRANSFER = 'TRANFER'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
     stages {
         stage('Descarga de Fuentes') {
             steps {
+                deleteDir()
+                checkout scm
+            }
+        }
+
+        stage('Creación de cuenta de servicio') {
+            steps {
                 script {
-                    deleteDir()
-                    checkout scm
+                    echo 'Creando cuenta de servicio en Google Cloud...'
+                    sh "gcloud iam service-accounts create ${SERVICE_ACCOUNT_NAME} --description='Service account for data transfer' --display-name='Data Transfer Service Account'"
+                    sh "gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com --role=roles/storage.admin"
                 }
             }
         }
 
         stage('Activando Service Account') {
             steps {
-                script {
-                    echo 'Iniciando la etapa de Activando Service Account...'
-                    withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
-                        sh """\$(gcloud auth activate-service-account --key-file=\$SECRET_FILE)"""
-                    }
-                    echo 'Service Account activada correctamente.'
+                withCredentials([file(credentialsId: "${SERVICE_ACCOUNT_NAME}", variable: 'SECRET_FILE')]) {
+                    sh """\$(gcloud auth activate-service-account --key-file=\$SECRET_FILE)"""
                 }
             }
         }
-        
+
         stage('Create Bucket in GCP') {
             steps {
                 script {
-                    echo 'Iniciando la etapa de Creacion de Bucket en GCP...'
+                    echo 'Iniciando la etapa de Creacion de Bucket en GCP..'
                     sh "gcloud config set project ${PROJECT_ID}"
                     def bucketExists = sh(script: "gsutil ls gs://${NAME_BUCKET_GCP}", returnStatus: true)
                     if (bucketExists != 0) {
@@ -49,51 +52,34 @@ pipeline {
                 }
             }
         }
-       stage('Creacion de trasferencia de datos de AWS a GCP') {
-                steps {
-                    script {
-                        // Recupera las credenciales de AWS desde Cloud Secret Manager
-                        def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
-                        
-                        // Ruta al archivo donde se guardarán las credenciales
-                        def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
-                        // Escribir las credenciales en el archivo
-                        writeFile file: awsCredentialsFilePath, text: awsCredentials
-                        
-                        // Definir la variable COMANDO fuera del bloque if-else
-                        def COMANDO
-                        def NOMBRE
-                        
-                        // Verificar si ya existe un transfer job con el mismo nombre
-                        def existingJob = sh(script: "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'", returnStdout: true, returnStatus: true)
-                        if(existingJob == 0) {
-                            // Si el trabajo ya existe, actualízalo
-                            COMANDO = "gcloud transfer jobs update ${NAME_TRANSFER}"
-                             NOMBRE = ""
-                        } else { 
-                            // Si el trabajo no existe, créalo
-                            COMANDO = "gcloud transfer jobs create s3://${NAME_BUCKET_S3} gs://${NAME_BUCKET_GCP}"
-                            NOMBRE = "--name=${NAME_TRANSFER}"
-                        }
-                        
-                        // Crear o actualizar el trabajo de transferencia
-                        sh """
-                            ${COMANDO} \
-                             ${NOMBRE} \
-                            --source-creds-file=${awsCredentialsFilePath} \
-                            --overwrite-when=different \
-                            --schedule-repeats-every=2h \
-                            --schedule-starts="2024-04-03T20:17:00Z" 
-                        """
-                    }
+
+        stage('Creacion de trasferencia de datos de AWS a GCP') {
+            steps {
+                script {
+                    def awsCredentials = sh(script: "gcloud secrets versions access latest --secret=${NAME_SECRET}", returnStdout: true).trim()
+                    def awsCredentialsFilePath = "${env.WORKSPACE}/aws_credentials.json"
+                    writeFile file: awsCredentialsFilePath, text: awsCredentials
+
+                    def command = "gcloud transfer jobs describe ${NAME_TRANSFER} --format='value(name)'"
+                    def existingJob = sh(script: command, returnStdout: true, returnStatus: true)
+
+                    command = existingJob == 0 ? "gcloud transfer jobs update ${NAME_TRANSFER}" : "gcloud transfer jobs create s3://${NAME_BUCKET_AWS} gs://${NAME_BUCKET_GCP} --name=${NAME_TRANSFER}"
+
+                    sh """
+                    ${command} \
+                    --source-creds-file=${awsCredentialsFilePath} \
+                    --overwrite-when=different \
+                    --schedule-repeats-every=1d \
+                    --schedule-starts="2024-04-11T12:30:00Z" \
+                    --schedule-repeats-until="2024-07-31T13:30:00Z"
+                    """
                 }
             }
+        }
 
         stage('Limpiando Workspace') {
             steps {
-                echo 'Iniciando la etapa de Limpiando Workspace...'
                 deleteDir()
-                echo 'Workspace limpiado.'
             }
         }
     }
