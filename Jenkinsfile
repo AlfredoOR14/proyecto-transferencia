@@ -5,9 +5,9 @@ pipeline {
         PROJECT_ID = 'devioz-pe-desa-analitica'
         NAME_SECRET = 'awss'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp1'
+        NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp2'
         GCP_SERVICE_ACCOUNT = 'devioz-pe-desa-analitica'
-        NAME_TRANSFER = 'TRANSFER2'
+        NAME_TRANSFER = 'TRANSFER3'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
     }
 
