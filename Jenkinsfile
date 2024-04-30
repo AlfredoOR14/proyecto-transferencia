@@ -4,12 +4,11 @@ pipeline {
     environment {
         PROJECT_ID = 'devioz-pe-test-analitica'
         NAME_SECRET = 'awss'
-        GCP_SERVICE_ACCOUNT = 'devioz-pe-test-analitica'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp'
-        NAME_TRANSFER = 'TRANFER'
+        NAME_TRANSFER = 'TRANSFER'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
-        SERVICE_ACCOUNT_NAME = 'project-605834808967'
+        SERVICE_ACCOUNT_NAME = "project-${PROJECT_ID}@storage-transfer-service.iam.gserviceaccount.com"
     }
 
     stages {
@@ -25,7 +24,7 @@ pipeline {
                 script {
                     echo 'Creando cuenta de servicio en Google Cloud...'
                     sh "gcloud iam service-accounts create ${SERVICE_ACCOUNT_NAME} --description='Service account for data transfer' --display-name='Data Transfer Service Account'"
-                    sh "gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com --role=roles/storage.admin"
+                    sh "gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${SERVICE_ACCOUNT_NAME} --role=roles/storage.admin"
                 }
             }
         }
@@ -85,3 +84,4 @@ pipeline {
         }
     }
 }
+
