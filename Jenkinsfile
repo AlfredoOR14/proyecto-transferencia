@@ -6,6 +6,7 @@ pipeline {
         NAME_SECRET = 'awss'
         GCP_LOCATION = 'us-central1'
         NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp'
+        GCP_SERVICE_ACCOUNT = 'devioz-pe-test-analitica'
         NAME_TRANSFER = 'TRANSFER'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
         SERVICE_ACCOUNT_NAME = "project-${PROJECT_ID}@storage-transfer-service.iam.gserviceaccount.com"
@@ -31,7 +32,7 @@ pipeline {
 
         stage('Activando Service Account') {
             steps {
-                withCredentials([file(credentialsId: "${SERVICE_ACCOUNT_NAME}", variable: 'SECRET_FILE')]) {
+                withCredentials([file(credentialsId: "${GCP_SERVICE_ACCOUNT}", variable: 'SECRET_FILE')]) {
                     sh """\$(gcloud auth activate-service-account --key-file=\$SECRET_FILE)"""
                 }
             }
