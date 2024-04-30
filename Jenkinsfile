@@ -28,6 +28,15 @@ pipeline {
             }
         }
 
+        stage('Crear Cuenta de Servicio en GCP') {
+            steps {
+                script {
+                    echo 'Creando cuenta para transfer'
+                    sh "gcloud projects add-iam-policy-binding ${PROJECT_ID} --member=serviceAccount:${STORAGE_SERVICE_ACCOUNT} --role=roles/storage.admin"
+                }
+            }
+        }
+
         stage('Create Bucket in GCP') {
             steps {
                 script {
@@ -37,13 +46,6 @@ pipeline {
                     if (bucketExists != 0) {
                         sh "gsutil mb -p ${PROJECT_ID} -l ${GCP_LOCATION} gs://${NAME_BUCKET_GCP}"
                         echo 'Bucket en GCP creado correctamente.'
-
-                        // Agregar permiso de administrador de objetos de Storage a la cuenta de servicio
-                        sh """
-                        gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-                            --member=serviceAccount:${STORAGE_SERVICE_ACCOUNT} \
-                            --role=roles/storage.admin
-                        """
                     } else {
                         echo "El bucket gs://${NAME_BUCKET_GCP} ya existe. No se creará otro."
                     }
