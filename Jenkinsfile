@@ -9,6 +9,7 @@ pipeline {
         NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp'
         NAME_TRANSFER = 'TRANFER'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
+        SERVICE_ACCOUNT_NAME = 'project-605834808967@storage-transfer-service.iam.gserviceaccount.com'
     }
 
     stages {
