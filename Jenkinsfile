@@ -3,13 +3,13 @@ pipeline {
 
     environment {
         PROJECT_ID = 'devioz-pe-desa-analitica'
-        NAME_SECRET = 'awss'
+        NAME_SECRET = 'PRUEBA'
         GCP_LOCATION = 'us-central1'
-        NAME_BUCKET_GCP = 'mi-bucket-gcp-gcp3'
-        GCP_SERVICE_ACCOUNT = 'devioz-pe-desa-analitica'
-        NAME_TRANSFER = 'TRANSFER4'
+        NAME_BUCKET_GCP = 'bucket-unico-prueba-2'
+        GCP_SERVICE_ACCOUNT = 'devioz-pe-desa-analitica-gcp'
+        NAME_TRANSFER = 'tranferencia5'
         NAME_BUCKET_AWS = 'mi-bucket-aws-1'
-        STORAGE_SERVICE_ACCOUNT = 'project-1073031677866@storage-transfer-service.iam.gserviceaccount.com'
+        STORAGE_SERVICE_ACCOUNT = 'devioz-pe-desa-analitica-277@devioz-pe-desa-analitica.iam.gserviceaccount.com'
     }
 
     stages {
